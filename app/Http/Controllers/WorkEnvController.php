@@ -16,7 +16,8 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\ApprobedMailable;
 use App\Mail\NotApprobedMailable;
-
+use App\Mail\RequestWorkEnvMailable;
+use Termwind\Components\Raw;
 
 class WorkEnvController extends Controller
 {
@@ -24,14 +25,11 @@ class WorkEnvController extends Controller
     public function CountMyWorkEnvs(){
         
         $currentUser = Auth::id();
-
-
         $count = JoinWorkEnvUser::where('idUser', $currentUser)->where('privilege', 2)->count();
         $count2 = JoinWorkEnvUser::where('idUser', $currentUser)->where('privilege', '!=', 2)->count();
 
         return response()->json(["owner" => $count,
                                  "participant" => $count2]);
-
 
     }
 
@@ -136,9 +134,39 @@ class WorkEnvController extends Controller
 
         $joinwork->save();
 
-        return response()->json(['success' => 'workenv registred']);
+        return response()->json(['message' => 'ok']);
 
     }
+
+    public function  updateWorkEnv(Request $request){
+
+
+        if(!WorkEnv::find($request->input('idWorkEnv'))){
+            return response()->json(['message' => 'workenv not found']);
+        }
+
+        $workenv = WorkEnv::find($request->input('idWorkEnv'));
+
+        $workenv->nameW = $request->input('nameW');
+        $workenv->descriptionW = $request->input('descriptionW');
+        $workenv->type = $request->input('type');
+        $workenv->date_start = $request->input('date_start');
+        $workenv->date_end = $request->input('date_end');
+        $workenv->logicdeleted = $request->input(0);
+
+        $workenv->save();
+        return response()->json(['message' => 'ok']);
+
+    }
+
+    public function deleteWorkEnv(Request $request){
+
+        if(WorkEnv::where('idWorkEnv', $request->input('idWorkEnv'))->update(['logicdeleted' => 1])){
+            return response()->json(['message' => 'ok']);
+        }
+        return response()->json(['error' => 'workenv not found']);
+    }
+
     
     public function getMyWorkEnvs(){
         $idUser = Auth::id();
@@ -449,6 +477,10 @@ class WorkEnvController extends Controller
 
     }
 
+
+
+
+
         public function searchRequests($text)
     {
         // Obtener el ID del usuario actual
@@ -618,5 +650,29 @@ class WorkEnvController extends Controller
         return response()->json(['success' => 'ok']);
 
     }
+    public function NotifyUserNewRequest($workenv, $idUser){
 
+        $member = Auth::user()->name;
+        $owner = User::find($idUser)->name;
+        $emailowner = User::find($idUser)->email;
+        $newNotification = new Notifications();
+        $fechaActual = date('Y-m-d');
+        if(!User::find($idUser)->name){
+            return response()->json(['error' => 'user not found']);
+
+        }
+       
+    
+        Mail::to($emailowner)->send(new RequestWorkEnvMailable($workenv, $owner, $member));
+        $newNotification->title = "Solicitud de unión al entorno ".$workenv;
+        $newNotification->description = "El usuario ".$member." desea unirse al entorno ".$workenv;
+        $newNotification->content = "Solicitud enviada el: ". $fechaActual;
+        $newNotification->seen = 0;
+        $newNotification->logicdeleted = 0;
+        $newNotification->idUser = $idUser;
+        $newNotification->save();
+
+        return response()->json(['success' => 'ok']);
+
+    }
 }
