@@ -6,11 +6,17 @@ use Illuminate\Http\Request;
 use App\Models\WorkEnv;
 use App\Models\JoinWorkEnvUser;
 use App\Models\Card;
+use App\Models\User;
+use App\Models\Notifications;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\ApprobedMailable;
+use App\Mail\NotApprobedMailable;
+
 
 class WorkEnvController extends Controller
 {
@@ -578,6 +584,39 @@ class WorkEnvController extends Controller
         return response()->json($results);
     }
     
+    public function NotifyUserApprobedOrNot($workenv, $idUser, $flag){
 
+        $owner = Auth::user()->name;
+        $member = User::find($idUser)->name;
+        $emailmember = User::find($idUser)->email;
+        $newNotification = new Notifications();
+        $fechaActual = date('Y-m-d');
+        if(!User::find($idUser)->name){
+            return response()->json(['error' => 'user not found']);
+
+        }
+        if($flag==1){
+            $title = "Solicitud de unión aceptada";
+            $newNotification->title = $title;
+            $newNotification->description =  "El usuario ".$owner. " ha aceptado tu solicitud al entorno ".$workenv;
+            $newNotification->content = "Aceptado en: ".$fechaActual;
+            Mail::to($emailmember)->send(new ApprobedMailable($member, $workenv, $owner));
+        }else{
+            $title = "Solicitud de unión rechazada"; 
+            $newNotification->title = $title;
+            $newNotification->description =  "El usuario ".$owner. " ha rechazado tu solicitud al entorno ".$workenv;
+            $newNotification->content = "Rechazado en: ".$fechaActual;
+            Mail::to($emailmember)->send(new NotApprobedMailable($member, $workenv, $owner));
+
+        }
+
+        $newNotification->seen = 0;
+        $newNotification->logicdeleted = 0;
+        $newNotification->idUser = $idUser;
+        $newNotification->save();
+
+        return response()->json(['success' => 'ok']);
+
+    }
 
 }

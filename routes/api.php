@@ -46,6 +46,7 @@ Route::middleware('auth:sanctum')->group(function (){ //Manejar la sesión del u
     Route::get('notapprobeRequestWorkEnv/{idJoinUserWork}', [WorkEnvController::class, 'notapprobeRequestWorkEnv']); //para rechazar una solicitud pendiente de unión a un entorno.
     Route::get('getPendingApprovalsSearch/{searchTerm}', [WorkEnvController::class, 'getPendingApprovalsSearch']); //para buscar solicitudes pendientes.
     
+    Route::get('NotifyUserApprobedOrNot/{workenv}/{idUser}/{flag}', [WorkEnvController::class, 'NotifyUserApprobedOrNot']); //para notificar a el usuario vía correo y sistema que ha sido aceptado o rechazado en un entorno.
 
 
 

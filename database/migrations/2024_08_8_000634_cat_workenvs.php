@@ -130,18 +130,82 @@ return new class extends Migration
             $table->foreign('idLabel')->references('idLabel')->on('cat_labels')->onDelete('cascade');
             $table->timestamps();
         });
+
+        Schema::create('cat_notifications', function (Blueprint $table) {
+            $table->id('idNotification')->autoIncrement()->nullable(false);
+            $table->string('title', 45)->nullable(false);
+            $table->string('description', 255)->nullable();
+            $table->string('content', 100)->nullable();
+            $table->integer('seen')->nullable();
+            $table->integer('logicdeleted')->nullable();
+            $table->unsignedBigInteger('idUser');
+            $table->foreign('idUser')->references('idUser')->on('users')->onDelete('cascade');
+            $table->timestamps();
+
+        });
         
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::table('cat_workenvs', function (Blueprint $table) {
-            $table->dropForeign(['idUser']); // Eliminar la clave foránea
+        // Primero eliminamos las claves foráneas antes de eliminar las tablas
+
+        Schema::table('cat_activity_coordinatorleaders', function (Blueprint $table) {
+            $table->dropForeign(['idgrouptaskcl']);
+            $table->dropForeign(['idLabel']);
         });
 
-        Schema::dropIfExists('cat_workenvs'); // Eliminar la tabla
+        Schema::table('cat_labels', function (Blueprint $table) {
+            $table->dropForeign(['idWorkEnv']);
+        });
+
+        Schema::table('cat_grouptasks_coordinatorleaders', function (Blueprint $table) {
+            $table->dropForeign(['idJoinUserWork']);
+        });
+
+        Schema::table('cat_comments', function (Blueprint $table) {
+            $table->dropForeign(['idCard']);
+            $table->dropForeign(['idJoinUserWork']);
+        });
+
+        Schema::table('rel_cards_users', function (Blueprint $table) {
+            $table->dropForeign(['idCard']);
+            $table->dropForeign(['idJoinUserWork']);
+        });
+
+        Schema::table('cat_cards', function (Blueprint $table) {
+            $table->dropForeign(['idList']);
+        });
+
+        Schema::table('cat_lists', function (Blueprint $table) {
+            $table->dropForeign(['idBoard']);
+        });
+
+        Schema::table('cat_boards', function (Blueprint $table) {
+            $table->dropForeign(['idWorkEnv']);
+        });
+
+        Schema::table('rel_join_workenv_users', function (Blueprint $table) {
+            $table->dropForeign(['idUser']);
+            $table->dropForeign(['idWorkEnv']);
+        });
+
+        Schema::table('cat_notifications', function (Blueprint $table) {
+            $table->dropForeign(['idUser']);
+        });
+
+        // Ahora eliminamos todas las tablas en orden inverso al de su creación
+
+        Schema::dropIfExists('cat_notifications');
+        Schema::dropIfExists('cat_activity_coordinatorleaders');
+        Schema::dropIfExists('cat_labels');
+        Schema::dropIfExists('cat_grouptasks_coordinatorleaders');
+        Schema::dropIfExists('cat_comments');
+        Schema::dropIfExists('rel_cards_users');
+        Schema::dropIfExists('cat_cards');
+        Schema::dropIfExists('cat_lists');
+        Schema::dropIfExists('cat_boards');
+        Schema::dropIfExists('rel_join_workenv_users');
+        Schema::dropIfExists('cat_workenvs');
     }
 };
