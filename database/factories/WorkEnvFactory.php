@@ -22,6 +22,7 @@ class WorkEnvFactory extends Factory
             "descriptionW" => $this->faker->sentence(), // Asegúrate de que esta columna esté presente en tu migración
             "date_start" => '2024-08-10',
             "date_end" => '2024-09-10',
+            'logicdeleted' => 0
         ];
     }
     

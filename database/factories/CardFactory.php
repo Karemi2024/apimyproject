@@ -21,9 +21,11 @@ class CardFactory extends Factory
             'descriptionC' => $this->faker->sentence(),
             'end_date' => $this->faker->date('Y-m-d','now'),
             'approbed' => $this->faker->randomElement([0,1]),
+            'logicdeleted' => 0,
             'important' => $this->faker->randomElement([0,1]),
             'done' => $this->faker->randomElement([0,1]),
-            'idList' => $this->faker->randomElement([1,5])   
+            'idList' => $this->faker->randomElement([1,5]),   
+            'logicdeleted' => 0
 
         ];
     }

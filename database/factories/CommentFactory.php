@@ -19,6 +19,7 @@ class CommentFactory extends Factory
         return [
             'idCard' => $this->faker->randomElement([1,5]),
             'idJoinUserWork' => $this->faker->randomElement([1,5]),
+            'logicdeleted' => 0,
             'text' => $this->faker->sentence(),
             'seen' => $this->faker->randomElement([0,1]),
         ];

@@ -20,7 +20,8 @@ class ListsFactory extends Factory
             'nameL' => $this->faker->name(),
             'descriptionL' => $this->faker->sentence(),
             'colorL' => $this->faker->randomElement(['#FF0000', '#00FF00', '#0000FF']),
-            'idBoard' => $this->faker->randomElement([1,5])
+            'idBoard' => $this->faker->randomElement([1,5]),
+            'logicdeleted' => 0,
         ];
     }
 }

@@ -46,6 +46,11 @@ Route::middleware('auth:sanctum')->group(function (){ //Manejar la sesión del u
     //Notificaciones
     Route::get('NotifyUserApprobedOrNot/{workenv}/{idUser}/{flag}', [WorkEnvController::class, 'NotifyUserApprobedOrNot']); //para notificar a el usuario vía correo y sistema que ha sido aceptado o rechazado en un entorno.
     Route::get('NotifyUserNewRequest/{workenv}/{idUser}', [WorkEnvController::class, 'NotifyUserNewRequest']); //para notificar a el usuario vía correo y sistema sobre una nueva solicitud de unión a un entorno.
+    Route::get('getNotifications',[WorkEnvController::class, 'getNotifications']); //para obtener todas la notis de un user.
+    Route::get('setSeenNotificationn/{idNoti}',[WorkEnvController::class, 'setSeenNotificationn']); //para indicar que la noti ha sido visto por el user.
+    Route::get('countMyNotis',[WorkEnvController::class, 'countMyNotis']); //para contar las notis del user.
+
+
 
 
     //CRUD entornos de trabajo
