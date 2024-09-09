@@ -56,8 +56,14 @@ Route::middleware('auth:sanctum')->group(function (){ //Manejar la sesión del u
     //CRUD entornos de trabajo
     Route::put('updateWorkEnv', [WorkEnvController::class, 'updateWorkEnv']); //para actualizar un entorno de trabajo
     Route::post('newWorkEnv', [WorkEnvController::class, 'newWorkEnv']); //para registrar un nuevo entorno de trabajo
-    Route::delete('deleteWorkEnv',[WorkEnvController::class, 'deleteWorkEnv']); //para eliminar logicamente un entorno de trabajo
+    Route::delete('deleteWorkEnv/{idWorkEnv}',[WorkEnvController::class, 'deleteWorkEnv']); //para eliminar logicamente un entorno de trabajo
     
+    Route::get('getWorkEnvOwner/{idWorkEnv}',[WorkEnvController::class, 'getWorkEnvOwner']); //para obtener el líder del entorno.
+    Route::get('getMyArchivedWorkEnvs',[WorkEnvController::class, 'getMyArchivedWorkEnvs']); //para obtener los entornos archivados de un user.
+    Route::put('undeleteWorkEnv/{idWorkEnv}',[WorkEnvController::class, 'undeleteWorkEnv']); //para desarchivar un entorno.
+    
+
+
 
 
 });

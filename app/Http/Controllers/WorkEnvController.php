@@ -65,6 +65,7 @@ class WorkEnvController extends Controller
         ->join('cat_lists', 'cat_cards.idList', '=', 'cat_lists.idList')
         ->join('cat_boards', 'cat_boards.idBoard', '=', 'cat_lists.idBoard')
         ->join('cat_workenvs', 'cat_workenvs.idWorkEnv', '=', 'cat_boards.idWorkEnv')
+        ->where('cat_workenvs.logicdeleted', "!=", 1)
         ->whereIn('cat_workenvs.idWorkEnv', $workEnvIds)
         ->where(function ($query) use ($today, $oneWeekLater) {
             $query->whereBetween('cat_cards.end_date', [$today, $oneWeekLater])
@@ -75,16 +76,29 @@ class WorkEnvController extends Controller
     // Retornar los resultados
     return response()->json($cards);
 }
-    public function CountMyWorkEnvs(){
-        
-        $currentUser = Auth::id();
-        $count = JoinWorkEnvUser::where('idUser', $currentUser)->where('privilege', 2)->count();
-        $count2 = JoinWorkEnvUser::where('idUser', $currentUser)->where('privilege', '!=', 2)->count();
+public function CountMyWorkEnvs()
+{
+    $currentUser = Auth::id();
 
-        return response()->json(["owner" => $count,
-                                 "participant" => $count2]);
+    // Contar los entornos donde el usuario es dueño (privilege = 2) y no han sido archivados
+    $countOwner = JoinWorkEnvUser::join('cat_workenvs', 'cat_workenvs.idWorkEnv', '=', 'rel_join_workenv_users.idWorkEnv')
+        ->where('rel_join_workenv_users.idUser', $currentUser)
+        ->where('rel_join_workenv_users.privilege', 2)
+        ->where('cat_workenvs.logicdeleted', '!=', 1)
+        ->count();
 
-    }
+    // Contar los entornos donde el usuario es participante (privilege != 2) y no han sido archivados
+    $countParticipant = JoinWorkEnvUser::join('cat_workenvs', 'cat_workenvs.idWorkEnv', '=', 'rel_join_workenv_users.idWorkEnv')
+        ->where('rel_join_workenv_users.idUser', $currentUser)
+        ->where('rel_join_workenv_users.privilege', '!=', 2)
+        ->where('cat_workenvs.logicdeleted', '!=', 1)
+        ->count();
+
+    return response()->json([
+        "owner" => $countOwner,
+        "participant" => $countParticipant
+    ]);
+}
 
     public function getAllStatsUser() {
         // Obtener el ID del usuario actual
@@ -144,6 +158,7 @@ class WorkEnvController extends Controller
             ->leftJoin('cat_cards', 'cat_lists.idList', '=', 'cat_cards.idList')
             ->where('rel_join_workenv_users.logicdeleted', '!=', 1) 
             ->whereIn('cat_workenvs.idWorkEnv', $workEnvIds)
+            ->where('cat_workenvs.logicdeleted', "!=", 1)
             ->groupBy('cat_workenvs.idWorkEnv', 'cat_workenvs.nameW')
             ->get();
     
@@ -212,9 +227,16 @@ class WorkEnvController extends Controller
 
     }
 
-    public function deleteWorkEnv(Request $request){
+    public function deleteWorkEnv($idWorkEnv){
 
-        if(WorkEnv::where('idWorkEnv', $request->input('idWorkEnv'))->update(['logicdeleted' => 1])){
+        if(WorkEnv::where('idWorkEnv', $idWorkEnv)->update(['logicdeleted' => 1])){
+            return response()->json(['message' => 'ok']);
+        }
+        return response()->json(['error' => 'workenv not found']);
+    }
+
+    public function undeleteWorkEnv($idWorkEnv){
+        if(WorkEnv::where('idWorkEnv', $idWorkEnv)->update(['logicdeleted' => 0])){
             return response()->json(['message' => 'ok']);
         }
         return response()->json(['error' => 'workenv not found']);
@@ -232,12 +254,14 @@ class WorkEnvController extends Controller
         ->where('rel_join_workenv_users.privilege', 2)
         ->where('rel_join_workenv_users.approbed', 1)
         ->where('rel_join_workenv_users.logicdeleted', '!=', 1) 
+        ->where('cat_workenvs.logicdeleted', "!=", 1)
         ->get();
 
         // Obtener entornos donde privilege es diferente de 2
         $results2 = WorkEnv::select('cat_workenvs.nameW as title', 'cat_workenvs.type', 'cat_workenvs.descriptionW', 'cat_workenvs.date_start', 'cat_workenvs.date_end', 'rel_join_workenv_users.privilege', 'cat_workenvs.idWorkEnv')
             ->join('rel_join_workenv_users', 'cat_workenvs.idWorkEnv', '=', 'rel_join_workenv_users.idWorkEnv')
             ->where('rel_join_workenv_users.idUser', $idUser)
+            ->where('cat_workenvs.logicdeleted', "!=", 1)
             ->where('rel_join_workenv_users.approbed', 1)
             ->where('rel_join_workenv_users.privilege', '!=', 2) // Filtrar donde privilege no es igual a 2
             ->where('rel_join_workenv_users.logicdeleted', '!=', 1) 
@@ -247,12 +271,32 @@ class WorkEnvController extends Controller
 
     }
 
+    public function getMyArchivedWorkEnvs(){
+        $idUser = Auth::id();
+
+        
+        // Obtener entornos donde privilege es igual a 2
+        $results = WorkEnv::select('cat_workenvs.nameW as title', 'cat_workenvs.type', 'cat_workenvs.descriptionW', 'cat_workenvs.date_start', 'cat_workenvs.date_end', 'rel_join_workenv_users.privilege', 'cat_workenvs.idWorkEnv')
+        ->join('rel_join_workenv_users', 'cat_workenvs.idWorkEnv', '=', 'rel_join_workenv_users.idWorkEnv')
+        ->where('rel_join_workenv_users.idUser', $idUser)
+        ->where('rel_join_workenv_users.privilege', 2)
+        ->where('rel_join_workenv_users.approbed', 1)
+        ->where('rel_join_workenv_users.logicdeleted', '!=', 1) 
+        ->where('cat_workenvs.logicdeleted', 1)
+        ->get();
+
+
+        return response()->json($results);
+
+    }
+
+
     public function AmIOnWorkEnv($idWorkEnv)
     {
         $idUser = Auth::id();
     
         // Realiza la consulta para verificar si el usuario está en el entorno de trabajo
-        $result = WorkEnv::select('cat_workenvs.nameW as title', 'cat_workenvs.type', 'cat_workenvs.descriptionW', 'cat_workenvs.date_start', 'cat_workenvs.date_end', 'rel_join_workenv_users.privilege', 'cat_workenvs.idWorkEnv')
+        $result = WorkEnv::select('cat_workenvs.nameW as title', 'cat_workenvs.type', 'cat_workenvs.descriptionW', 'cat_workenvs.date_start', 'cat_workenvs.date_end', 'rel_join_workenv_users.privilege', 'cat_workenvs.idWorkEnv', 'cat_workenvs.logicdeleted')
             ->join('rel_join_workenv_users', 'cat_workenvs.idWorkEnv', '=', 'rel_join_workenv_users.idWorkEnv')
             ->where('rel_join_workenv_users.idUser', $idUser)
             ->where('cat_workenvs.idWorkEnv', $idWorkEnv)
@@ -267,6 +311,17 @@ class WorkEnvController extends Controller
         return response()->json($result);
     }
     
+
+    public function getWorkEnvOwner($idWorkEnv){
+
+        $idUser = JoinWorkEnvUser::select('idUser')->where('idWorkEnv', $idWorkEnv)->where('privilege', 2)->first();
+
+        $idUser = $idUser['idUser'];
+
+        $owner = User::where('idUser', $idUser)->first();
+        return response()->json($owner);
+
+    }
 
     public function getNotApprobedActivities(){
 
@@ -307,6 +362,7 @@ class WorkEnvController extends Controller
             ->join('cat_lists', 'cat_cards.idList', '=', 'cat_lists.idList')
             ->join('cat_boards', 'cat_boards.idBoard', '=', 'cat_lists.idBoard')
             ->join('cat_workenvs', 'cat_workenvs.idWorkEnv', '=', 'cat_boards.idWorkEnv')
+            ->where('cat_workenvs.logicdeleted', "!=", 1)
             ->whereIn('cat_workenvs.idWorkEnv', $workEnvIds)
             ->where('cat_cards.approbed', 0)
             ->where('cat_cards.done', 1)
@@ -358,6 +414,7 @@ class WorkEnvController extends Controller
             })
             ->join('users', 'users.idUser', '=', 'rel_join_workenv_users.idUser')
             ->where('cat_comments.seen', 0) // Solo comentarios no vistos
+            ->where('cat_workenvs.logicdeleted', "!=", 1)
             ->whereIn('cat_workenvs.idWorkEnv', $workEnvIds) // Solo los entornos de trabajo del usuario
             ->where('rel_join_workenv_users.logicdeleted', '!=', 1) // Excluir usuarios eliminados lógicamente
             ->get();
@@ -394,6 +451,7 @@ class WorkEnvController extends Controller
             'cat_workenvs.type'
         )
         ->where('rel_join_workenv_users.approbed', 0)
+        ->where('cat_workenvs.logicdeleted', "!=", 1)
         ->where('rel_join_workenv_users.logicdeleted', '!=', 1) 
         ->whereIn('rel_join_workenv_users.idWorkEnv', $workEnvIds) // Filtrar por los entornos en los que el usuario tiene privilegio 1 o 2
         ->get();
@@ -433,6 +491,7 @@ public function getPossibleRequests()
             DB::raw('COUNT(rel_join_workenv_users.idUser) as Miembros')
         )
         ->where('rel_join_workenv_users.privilege', 2) // Incluir solo entornos donde privilege es 2
+        ->where('cat_workenvs.logicdeleted', "!=", 1)
         ->where('rel_join_workenv_users.logicdeleted', '!=', 1) // Asegurar que no esté marcado como eliminado
         ->groupBy('cat_workenvs.idWorkEnv', 'users.name', 'users.email', 'cat_workenvs.nameW', 'cat_workenvs.date_start', 'cat_workenvs.date_end', 'users.idUser') // Asegurar que todos los campos están en el grupo
         ->when($participatesInAnyWorkEnv, function($query) use ($workEnvIds) {
@@ -492,7 +551,8 @@ public function getPossibleRequests()
             )
             ->whereNotIn('cat_workenvs.idWorkEnv', $workEnvIds) // Filtrar por entornos donde el usuario no participa
             ->where('rel_join_workenv_users.privilege', 2) // Incluir solo entornos donde privilege es 2
-            ->where('rel_join_workenv_users.logicdeleted', '!=', 1) // Asegurar que no esté marcado como eliminado
+            ->where('rel_join_workenv_users.logicdeleted', '!=', 1)
+            ->where('cat_workenvs.logicdeleted', "!=", 1) // Asegurar que no esté marcado como eliminado
             ->where(function($query) use ($text) {
                 $query->where('cat_workenvs.nameW', 'like', '%' . $text . '%') // Filtrar por nameW
                     ->orWhere('users.email', 'like', '%' . $text . '%') // Filtrar por email
@@ -591,6 +651,7 @@ public function getPossibleRequests()
             )
             ->where('rel_join_workenv_users.approbed', 0)
             ->where('rel_join_workenv_users.logicdeleted', '!=', 1) 
+            ->where('cat_workenvs.logicdeleted', "!=", 1)
             ->whereIn('rel_join_workenv_users.idWorkEnv', $workEnvIds) // Filtrar por los entornos en los que el usuario tiene privilegio 1 o 2
             ->where(function($query) use ($searchTerm) {
                 $query->where('users.name', 'LIKE','%' .  $searchTerm . '%')
