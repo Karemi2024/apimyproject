@@ -9,7 +9,7 @@ class WorkEnv extends Model
 {
     use HasFactory;
     protected $table = "cat_workenvs";
-
+    protected $primaryKey = 'idWorkEnv'; // Define la clave primaria
     protected $fillable = [
         'nameW', 
         'type', 

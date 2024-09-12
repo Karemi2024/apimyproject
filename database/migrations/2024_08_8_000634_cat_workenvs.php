@@ -130,18 +130,172 @@ return new class extends Migration
             $table->foreign('idLabel')->references('idLabel')->on('cat_labels')->onDelete('cascade');
             $table->timestamps();
         });
+
+        Schema::create('cat_notifications', function (Blueprint $table) {
+            $table->id('idNotification')->autoIncrement()->nullable(false);
+            $table->string('title', 45)->nullable(false);
+            $table->string('description', 255)->nullable();
+            $table->string('content', 100)->nullable();
+            $table->integer('seen')->nullable();
+            $table->integer('logicdeleted')->nullable();
+            $table->unsignedBigInteger('idUser');
+            $table->foreign('idUser')->references('idUser')->on('users')->onDelete('cascade');
+            $table->timestamps();
+
+        });
+
+        Schema::create('rel_card_labels', function (Blueprint $table) {
+            $table->id('idCardLabel')->autoIncrement()->nullable(false);
+            $table->unsignedBigInteger('idCard');
+            $table->unsignedBigInteger('idLabel');
+            $table->foreign('idCard')->references('idCard')->on('cat_cards')->onDelete('cascade');
+            $table->foreign('idLabel')->references('idLabel')->on('cat_labels')->onDelete('cascade');
+            $table->timestamps();
+
+        });
+
+        Schema::create('cat_tasks', function (Blueprint $table) {
+            $table->id('idTask')->autoIncrement()->nullable(false);
+            $table->string('nameT', 45)->nullable(false);
+            $table->string('descriptionT', 255)->nullable();
+            $table->date('end_date')->nullable();
+            $table->integer('done')->nullable();
+            $table->integer('logicdeleted')->nullable();
+            $table->unsignedBigInteger('idLabel');
+            $table->unsignedBigInteger('idCard');
+            $table->foreign('idCard')->references('idCard')->on('cat_cards')->onDelete('cascade');
+            $table->foreign('idLabel')->references('idLabel')->on('cat_labels')->onDelete('cascade');
+            $table->timestamps();
+
+        });
+        
+        Schema::create('cat_task_coordinatorleaders', function (Blueprint $table) {
+            $table->id('idTaskCL')->autoIncrement()->nullable(false);
+            $table->string('nameT', 45)->nullable(false);
+            $table->string('descriptionT', 255)->nullable();
+            $table->date('end_date')->nullable();
+            $table->integer('done')->nullable();
+            $table->integer('logicdeleted')->nullable();
+            $table->unsignedBigInteger('idLabel');
+            $table->unsignedBigInteger('idactivitycl');
+            $table->foreign('idactivitycl')->references('idactivitycl')->on('cat_activity_coordinatorleaders')->onDelete('cascade');
+            $table->foreign('idLabel')->references('idLabel')->on('cat_labels')->onDelete('cascade');
+            $table->timestamps();
+
+        });
+
+        Schema::create('cat_calendarevents', function (Blueprint $table) {
+            $table->id('idCalendarEvent')->autoIncrement()->nullable(false);
+            $table->string('title', 45)->nullable(false);
+            $table->string('description', 255)->nullable();
+            $table->string('color', 45)->nullable();
+            $table->date('start')->nullable();
+            $table->date('end')->nullable();
+            $table->integer('logicdeleted')->nullable();
+            $table->unsignedBigInteger('idJoinUserWork');
+            $table->foreign('idJoinUserWork')->references('idJoinUserWork')->on('rel_join_workenv_users')->onDelete('cascade');
+            $table->timestamps();
+
+        });
+
+        Schema::create('cat_folders', function (Blueprint $table) {
+            $table->id('idFolder')->autoIncrement()->nullable(false);
+            $table->string('nameF', 45)->nullable(false);
+            $table->unsignedBigInteger('idJoinUserWork');
+            $table->integer('logicdeleted')->nullable();
+            $table->foreign('idJoinUserWork')->references('idJoinUserWork')->on('rel_join_workenv_users')->onDelete('cascade');
+            $table->timestamps();
+
+        });
+
+        Schema::create('cat_files', function (Blueprint $table) {
+            $table->id('idFile')->autoIncrement()->nullable(false);
+            $table->string('nameA', 45)->nullable(false);
+            $table->string('path', 45)->nullable(false);
+            $table->integer('filesize')->nullable(false);
+            $table->string('type', 45)->nullable(false);
+            $table->integer('logicdeleted')->nullable();
+            $table->unsignedBigInteger('idFolder');
+            $table->foreign('idFolder')->references('idFolder')->on('cat_folders')->onDelete('cascade');
+            $table->timestamps();
+
+        });
+
+        Schema::create('rel_sharedfolder_user', function (Blueprint $table) {
+            $table->id('idShareFile')->autoIncrement()->nullable(false);
+            $table->unsignedBigInteger('idFolder');
+            $table->unsignedBigInteger('idJoinUserWork');
+            $table->integer('logicdeleted')->nullable();
+            $table->foreign('idJoinUserWork')->references('idJoinUserWork')->on('rel_join_workenv_users')->onDelete('cascade');
+            $table->foreign('idFolder')->references('idFolder')->on('cat_folders')->onDelete('cascade');
+            $table->timestamps();
+
+        });
+
         
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::table('cat_workenvs', function (Blueprint $table) {
-            $table->dropForeign(['idUser']); // Eliminar la clave foránea
+        
+        Schema::table('cat_activity_coordinatorleaders', function (Blueprint $table) {
+            $table->dropForeign(['idgrouptaskcl']);
+            $table->dropForeign(['idLabel']);
         });
 
-        Schema::dropIfExists('cat_workenvs'); // Eliminar la tabla
+        Schema::table('cat_labels', function (Blueprint $table) {
+            $table->dropForeign(['idWorkEnv']);
+        });
+
+        Schema::table('cat_grouptasks_coordinatorleaders', function (Blueprint $table) {
+            $table->dropForeign(['idJoinUserWork']);
+        });
+
+        Schema::table('cat_comments', function (Blueprint $table) {
+            $table->dropForeign(['idCard']);
+            $table->dropForeign(['idJoinUserWork']);
+        });
+
+        Schema::table('rel_cards_users', function (Blueprint $table) {
+            $table->dropForeign(['idCard']);
+            $table->dropForeign(['idJoinUserWork']);
+        });
+
+        Schema::table('cat_cards', function (Blueprint $table) {
+            $table->dropForeign(['idList']);
+        });
+
+        Schema::table('cat_lists', function (Blueprint $table) {
+            $table->dropForeign(['idBoard']);
+        });
+
+        Schema::table('cat_boards', function (Blueprint $table) {
+            $table->dropForeign(['idWorkEnv']);
+        });
+
+        Schema::table('rel_join_workenv_users', function (Blueprint $table) {
+            $table->dropForeign(['idUser']);
+            $table->dropForeign(['idWorkEnv']);
+        });
+
+        Schema::dropIfExists('rel_sharedfolder_user');
+        Schema::dropIfExists('cat_files');
+        Schema::dropIfExists('cat_folders');
+        Schema::dropIfExists('cat_calendarevents');
+        Schema::dropIfExists('cat_task_coordinatorleaders');
+        Schema::dropIfExists('cat_tasks');
+        Schema::dropIfExists('rel_card_labels');
+        Schema::dropIfExists('cat_notifications');
+        Schema::dropIfExists('cat_activity_coordinatorleaders');
+        Schema::dropIfExists('cat_labels');
+        Schema::dropIfExists('cat_grouptasks_coordinatorleaders');
+        Schema::dropIfExists('cat_comments');
+        Schema::dropIfExists('rel_cards_users');
+        Schema::dropIfExists('cat_cards');
+        Schema::dropIfExists('cat_lists');
+        Schema::dropIfExists('cat_boards');
+        Schema::dropIfExists('rel_join_workenv_users');
+        Schema::dropIfExists('cat_workenvs');
     }
+
 };

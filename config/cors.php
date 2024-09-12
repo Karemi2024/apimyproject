@@ -5,7 +5,7 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['http://localhost:3000'],
+    'allowed_origins' => ['http://localhost:4200', 'http://localhost:3000'],  // Añadir ambos orígenes
 
     'allowed_origins_patterns' => [],
 
@@ -15,6 +15,5 @@ return [
 
     'max_age' => 0,
 
-    'supports_credentials' => true,
-
+    'supports_credentials' => true,  // Mantener habilitado para el manejo de cookies o tokens
 ];

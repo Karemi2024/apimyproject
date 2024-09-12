@@ -29,7 +29,6 @@ Route::middleware('auth:sanctum')->group(function (){ //Manejar la sesión del u
     //Lógica para el dashboard
     Route::get('CountMyWorkEnvs', [WorkEnvController::class, 'CountMyWorkEnvs']); //para conocer la cantidad de entornos de trabajo en los que participa y es lider el user
     Route::get('getAllStatsUser', [WorkEnvController::class, 'getAllStatsUser']); //para conocer la cantidad de comentarios no vistos, solicitudes pendientes, actividades por evaluar y aprobar por entorno
-    Route::post('newWorkEnv', [WorkEnvController::class, 'newWorkEnv']); //para registrar un nuevo entorno de trabajo
     Route::get('getMyWorkEnvs', [WorkEnvController::class, 'getMyWorkEnvs']); //para obtener los entornos de trabajo del user
     Route::get('AmIOnWorkEnv/{idWorkEnv}',[WorkEnvController::class, 'AmIOnWorkEnv']); //para verificar si pertenece al workenv.
     Route::get('getNotApprobedActivities', [WorkEnvController::class, 'getNotApprobedActivities']); //para obtener las actividades aún no aprobadas
@@ -40,12 +39,30 @@ Route::middleware('auth:sanctum')->group(function (){ //Manejar la sesión del u
     Route::get('joinOnWorkEnv/{idWorkEnv}', [WorkEnvController::class, 'joinOnWorkEnv']); //para solicitar unirse a un entorno de trabajo.
     Route::get('searchRequests/{text}', [WorkEnvController::class, 'searchRequests']); //para obtener resultados de búsqueda o filtro de solicitudes.
     Route::get('getPendingApprovals', [WorkEnvController::class, 'getPendingApprovals']); //para obtener las solicitudes pendientes del user.
-
     Route::post('getPhoto', [WorkEnvController::class, 'getPhoto']); //para obtener una foto del servidor.
     Route::get('approbeRequestWorkEnv/{idUser}/{idWorkEnv}', [WorkEnvController::class, 'approbeRequestWorkEnv']); //para aprobar una solicitud pendiente de unión a un entorno.
     Route::get('notapprobeRequestWorkEnv/{idJoinUserWork}', [WorkEnvController::class, 'notapprobeRequestWorkEnv']); //para rechazar una solicitud pendiente de unión a un entorno.
     Route::get('getPendingApprovalsSearch/{searchTerm}', [WorkEnvController::class, 'getPendingApprovalsSearch']); //para buscar solicitudes pendientes.
+    //Notificaciones
+    Route::get('NotifyUserApprobedOrNot/{workenv}/{idUser}/{flag}', [WorkEnvController::class, 'NotifyUserApprobedOrNot']); //para notificar a el usuario vía correo y sistema que ha sido aceptado o rechazado en un entorno.
+    Route::get('NotifyUserNewRequest/{workenv}/{idUser}', [WorkEnvController::class, 'NotifyUserNewRequest']); //para notificar a el usuario vía correo y sistema sobre una nueva solicitud de unión a un entorno.
+    Route::get('getNotifications',[WorkEnvController::class, 'getNotifications']); //para obtener todas la notis de un user.
+    Route::get('setSeenNotificationn/{idNoti}',[WorkEnvController::class, 'setSeenNotificationn']); //para indicar que la noti ha sido visto por el user.
+    Route::get('countMyNotis',[WorkEnvController::class, 'countMyNotis']); //para contar las notis del user.
+
+
+
+
+    //CRUD entornos de trabajo
+    Route::put('updateWorkEnv', [WorkEnvController::class, 'updateWorkEnv']); //para actualizar un entorno de trabajo
+    Route::post('newWorkEnv', [WorkEnvController::class, 'newWorkEnv']); //para registrar un nuevo entorno de trabajo
+    Route::delete('deleteWorkEnv/{idWorkEnv}',[WorkEnvController::class, 'deleteWorkEnv']); //para eliminar logicamente un entorno de trabajo
     
+    Route::get('getWorkEnvOwner/{idWorkEnv}',[WorkEnvController::class, 'getWorkEnvOwner']); //para obtener el líder del entorno.
+    Route::get('getMyArchivedWorkEnvs',[WorkEnvController::class, 'getMyArchivedWorkEnvs']); //para obtener los entornos archivados de un user.
+    Route::put('undeleteWorkEnv/{idWorkEnv}',[WorkEnvController::class, 'undeleteWorkEnv']); //para desarchivar un entorno.
+    
+
 
 
 

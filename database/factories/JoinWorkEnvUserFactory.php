@@ -28,7 +28,8 @@ class JoinWorkEnvUserFactory extends Factory
             'approbed' => $this->faker->randomElement([0, 1]),
             'idWorkEnv' => $idWorkEnv,
             'idUser' => $idUser,
-            'privilege' => $this->faker->randomElement([0, 1, 2])
+            'privilege' => $this->faker->randomElement([0, 1, 2]),
+            'logicdeleted' => 0
         ];
     }
 }

@@ -14,11 +14,22 @@ class CardUsersFactory extends Factory
      *
      * @return array<string, mixed>
      */
+     // Asegurarse de que idWorkEnv e idUser no sean iguales
+     
     public function definition(): array
     {
+
+        $idcard = $this->faker->randomElement([1,5]);
+        $idjoinuserwork = $this->faker->randomElement([1,5]);
+     
+     while ($idcard == $idjoinuserwork) {
+        $idcard = $this->faker->randomElement([1, 5]);
+     }
+
+    
         return [
-            'idCard' => $this->faker->randomElement([1,5]),
-            'idJoinUserWork' => $this->faker->randomElement([1,5])
+            'idCard' => $idcard,
+            'idJoinUserWork' => $idjoinuserwork
         ];
     }
 }
