@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\WorkEnvController;
+use App\Http\Controllers\BackupController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -62,10 +63,10 @@ Route::middleware('auth:sanctum')->group(function (){ //Manejar la sesión del u
     Route::get('getMyArchivedWorkEnvs',[WorkEnvController::class, 'getMyArchivedWorkEnvs']); //para obtener los entornos archivados de un user.
     Route::put('undeleteWorkEnv/{idWorkEnv}',[WorkEnvController::class, 'undeleteWorkEnv']); //para desarchivar un entorno.
     
-
-
-
-
+    // Ruta para generar el respaldo y descargar el archivo .sql
+    Route::get('/database/backup', [BackupController::class, 'backupDatabase']);
+    // Ruta para restaurar la base de datos desde un archivo .sql
+    Route::post('/database/restore', [BackupController::class, 'restoreDatabase']);
 });
 
 
