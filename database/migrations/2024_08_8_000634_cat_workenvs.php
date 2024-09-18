@@ -120,7 +120,7 @@ return new class extends Migration
             $table->id('idactivitycl')->autoIncrement()->nullable(false);
             $table->string('nameT', 45)->nullable(false);
             $table->string('descriptionT', 100)->nullable();
-            $table->date('startdate')->nullable();
+            $table->date('end_date')->nullable();
             $table->integer('logicdeleted')->nullable();
             $table->integer('important')->nullable();
             $table->integer('done')->nullable();
