@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ReportsController;
 use App\Http\Controllers\WorkEnvController;
 use App\Http\Controllers\BackupController;
 use Illuminate\Http\Request;
@@ -67,6 +68,16 @@ Route::middleware('auth:sanctum')->group(function (){ //Manejar la sesión del u
     Route::get('/database/backup', [BackupController::class, 'backupDatabase']);
     // Ruta para restaurar la base de datos desde un archivo .sql
     Route::post('/database/restore', [BackupController::class, 'restoreDatabase']);
+
+    //logica de generación de reportes
+    Route::get('/pdf/ParticipantReport', [ReportsController::class, 'ParticipantReport']); // reporte de partipacion
+    Route::get('/pdf/ProductivityReport', [ReportsController::class, 'ProductivityReport']); // reporte de productividad
+    Route::get('/pdf/DeliveryActivitiesReport', [ReportsController::class, 'DeliveryActivitiesReport']); // reporte de plazos de entrega para miembros
+    Route::get('/pdf/DeliveryActivitiesReportCoordinator', [ReportsController::class, 'DeliveryActivitiesReportCoordinator']); // reporte de plazos de entrega para coordinadores
+    
+
+
+
 });
 
 

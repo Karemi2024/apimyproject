@@ -139,8 +139,8 @@ public function CountMyWorkEnvs()
                 '),
                 DB::raw('
                     COUNT(DISTINCT CASE 
-                        WHEN TIMESTAMPDIFF(DAY, NOW(), cat_cards.end_date) <= 7 
-                             AND TIMESTAMPDIFF(DAY, NOW(), cat_cards.end_date) >= 0
+                        WHEN TIMESTAMPDIFF(DAY, cat_cards.end_date, NOW()) <= 7 
+                             AND TIMESTAMPDIFF(DAY, cat_cards.end_date, NOW()) >= 0
                         OR cat_cards.end_date < NOW()
                         THEN cat_cards.idCard 
                     END) AS AlmostExpiredOrExpiredActivities

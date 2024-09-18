@@ -20,7 +20,10 @@ class DatabaseSeeder extends Seeder
         $this->call(CardSeeder::class);
         $this->call(CardUsersSeeder::class);
         $this->call(CommentSeeder::class);
-        
+        $this->call(LabelSeeder::class);
+        $this->call(GroupTaskCoordinatorLeaderSeeder::class);
+        $this->call(activitycoordinatorleaderSeeder::class);
+
         
     }
 }
