@@ -729,7 +729,7 @@ public function DeliveryActivitiesReportCoordinator(Request $request){
         $activityCounts[] = $activity->activity_count;
     }
 
-    // Datos para el gráfico de barras
+    // Datos para el gráfico de barras d
     $barChartUrl = "https://quickchart.io/chart";
     $barChartData = [
         'type' => 'bar',
