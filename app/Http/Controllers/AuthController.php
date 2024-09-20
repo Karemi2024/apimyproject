@@ -60,7 +60,7 @@ class AuthController extends Controller
             $user->save();
     
             // Redirige al usuario a la vista de verificación exitosa con el nombre del usuario en la URL
-            return redirect()->away('http://localhost:3000/accountverified?verified=true&name=' . urlencode($user->name));
+            return redirect()->away('http://localhost:4200/verificacion/verifica?verified=true&name=' . urlencode($user->name));
         }
     
         return response()->json(["message" => "El token no es válido."]);
@@ -144,7 +144,7 @@ class AuthController extends Controller
 
             if ($user) {
                 // Redirige al usuario a la vista de recuperación de cuenta con el token y el correo en la URL
-                return redirect()->away('http://localhost:3000/accountverified?recovery=true&token=' . urlencode($token) . '&email=' . urlencode($user->email));
+                return redirect()->away('http://localhost:4200/verificacion/verifica?recovery=true&token=' . urlencode($token) . '&email=' . urlencode($user->email));
             }
 
             return response()->json(["message" => "El token no es válido."]);
