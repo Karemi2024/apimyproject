@@ -145,6 +145,7 @@ class AuthController extends Controller
             if ($user) {
                 // Redirige al usuario a la vista de recuperación de cuenta con el token y el correo en la URL
                 return redirect()->away('http://localhost:4200/verificacion/verifica?recovery=true&token=' . urlencode($token) . '&email=' . urlencode($user->email));
+            
             }
 
             return response()->json(["message" => "El token no es válido."]);
