@@ -81,11 +81,12 @@ class AuthController extends Controller
             return response()->json(['message' => 'Por favor, verifica tu cuenta']);
         }
     
+        $domain = $request->getHost(); //llama al dominio del servidor
         // Generar el token
         $token = $user->createToken('token')->plainTextToken;
     
         // Crear la cookie de sesión
-        $cookie = cookie('jwt', $token, 60 * 24, '/', null, false, true, false, 'Lax');
+        $cookie = cookie('jwt', $token, 60 * 24, '/', $domain, false, true, false, 'Lax');
     
         return response()->json(['message' => 'success'])->withCookie($cookie);
     }
@@ -104,6 +105,7 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         // Elimina la cookie 'jwt'
+        
         $cookie = cookie('jwt', '', -1, '/', null, true, true, false, 'None');
     
         return response()->json(['message' => 'success'])->withCookie($cookie);
